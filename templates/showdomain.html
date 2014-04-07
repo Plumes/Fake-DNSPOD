@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% block info-bar %}
+<div id="info-bar">
+	<ul>
+		<li class="email"><a>{{uemail}}</a></li>
+		<li><a href="/logout">退出</a></li>
+	</ul>
+</div>
+{% end %}
+{% block main %}
+<div id="sidebar" class="siderbar">
+	<ul>
+		<li>全部域名</li>
+	</ul>
+</div>
+<div id="main">
+	<div id="record-control">
+		<div class="action">
+			<div class="btn-toolbar">
+				<a href="javascript:void(0);" id="addRec" class="btn btn-success">添加记录</a>
+				<a href="javascript:void(0);" id="delRec" class="btn btn-danger" disabled>删除记录</a>
+				<a href="javascript:void(0);" id="exportRec" class="btn btn-primary">导出该域名记录</a>
+				<form action="./record/import" enctype="multipart/form-data" method="post" style="display:none;" ><input type="file" name="importFile" id="importFile" onchange="document.forms[0].submit();" style="display:none;"  /></form>
+				<a href="javascript:void(0);" id="importRec" class="btn btn-info">导入该域名记录</a>
+			</div>
+		</div>
+	</div>
+	<div id="record-list">
+		<div id="domain-name"><span class="glyphicon glyphicon-home"></span>{{ domain_name }}</div>
+		<table class="table" role="tavle">
+		<thead>
+			<th> <input type="checkbox" id="checkall" ></th>
+			<th>主机记录</th>
+			<th>记录类型</th>
+			<th>线路类型</th>
+			<th>记录值</th>
+			<th>MX优先级</th>
+			<th>TTL</th>
+			<th>操作</th>
+		</thead>
+		<tbody>
+		{% if res==1 %}
+			{% for record in records %}
+			<tr class="entry {% if "hold" in record or record["enabled"]=="0" %}active{% end %}">
+				<td class="entry-checkbox">
+				{% if "hold" not in record %}
+					<input type="checkbox" value="{{ record["id"]}}" name="records">
+				{% end %}
+				</td>
+				<td class="sub_domain">
+					{{ record["name"] }}
+				</td>
+
+				<td class="type">{{record["type"]}}</td>
+				<td class="line">{{record["line"]}}</td>
+				<td class="value">{{record["value"]}}</td>
+				<td class="mx">{{record["mx"]}}</td>
+				<td class="ttl">{{record["ttl"]}}</td>
+				<td>
+					{% if "hold" not in record %}
+					<a href="javascript:void(0);" class="modifyRec">修改</a>
+						{% if record["enabled"] == "1" %}
+						<a href="javascript:void(0);" onclick="disableRec(this);" >暂停</a>
+						{% else %}
+						<a href="javascript:void(0);" onclick="enableRec(this);">启用</a>
+						{% end %}
+					{% end %}
+				</td>
+			</tr>
+			{% end %}
+		{% end %}
+		</tbody>
+		</table>
+	</div>
+</div>
+{% end %}
+{% block script %}
+<script>
+
+	$("#addRec").click(function () {
+		// body...
+		element = '<tr class="entry entry-create"><td></td>'
+						+'<td><input type="text" class="form-control" id="sub-domain"></td>'
+					+'<td><select name="record_type" id="record_type" onchange="check_mx(this);" >'
+					+'	<option value="A">A</option>'
+					+'	<option value="CNAME">CNAME</option>'
+					+	'<option value="MX">MX</option>'
+					+'</select></td>'
+					+'<td><select name="line" id="line" >'
+					+	'<option value="默认">默认</option>'
+					+'	<option value="电信">电信</option>'
+					+'	<option value="联通">联通</option>'
+					+'	<option value="教育网">教育网</option>'
+					+'	<option value="搜索引擎">搜索引擎</option>'
+					+'</select></td>'
+					+'<td><input type="text" name="value" id="value" class="form-control" /></td>'
+					+'<td><input type="text" name="mx" id="mx" class="form-control" disabled></td>'
+					+'<td><input type="text" name="ttl" id="ttl" class="form-control" value="600"/></td>'
+					+'<td><button type="button" onclick="addRec(this);" class="yes btn btn-success btn-xs" >保存</button>'
+					+'<button type="button" onclick="cancelAdd(this);" class="no btn btn-xs" >取消</button></td></tr>';
+		$("#record-list table tbody").prepend(element);
+	});
+	// 检查要添加的记录的类型是否为MX,当选择MX时使MX输入框可用
+	function check_mx(obj) {
+		if($(obj).val() === "MX"){
+			console.log($(obj).parent().parent().children("td").children("input#mx").prop("disabled"))
+			$(obj).parent().parent().children("td").children("input#mx").attr("disabled",false);
+		}
+		else {
+			$(obj).parent().parent().children("td").children("input#mx").attr("disabled",true);
+		}
+	}
+
+	function addRec(obj) {
+		rec={};
+		entry = $(obj).parent().parent().children("td");
+		rec["sub_domain"]=$(entry).children("#sub-domain").val();
+		rec["record_type"]=$(entry).children("#record_type").val();
+		rec["line"]=$(entry).children("#line").val();
+		rec["value"]=$(entry).children("#value").val();
+		rec["mx"]=$(entry).children("#mx").val();
+		rec["ttl"]=$(entry).children("#ttl").val();
+		//console.log(data);
+		//console.log(jQuery.isPlainObject(data));
+		$.post("./record/add",rec ).done(function(str){
+			//console.log(rec);
+			res = jQuery.parseJSON(str);
+			if(res["status"]["code"]==="1"){
+				self.location = "./";
+			}
+		});
+	}
+	function cancelAdd(obj) {
+		$(obj).parent().parent().remove();
+
+	}
+
+	$(".modifyRec").click(function(){
+		obj = this;
+		entry = $(obj).parent().parent();
+		rec={};
+		rec["id"] = $(entry).children("td").children("input[type='checkbox']").val();
+		rec["sub_domain"] = $(entry).children("td.sub_domain").text();
+		rec["type"] = $(entry).children("td.type").text();
+		rec["line"] = $(entry).children("td.line").text();
+		rec["value"] = $(entry).children("td.value").text();
+		rec["mx"] = $(entry).children("td.mx").text();
+		rec["ttl"] = $(entry).children("td.ttl").text();
+
+		element = '<tr class="entry entry-modify"><td></td>'
+						+'<td><input type="text" class="form-control" id="sub-domain" value="'+rec["sub_domain"]+'"></td>'
+					+'<td><select name="record_type" id="record_type" onchange="check_mx(this);" >'
+					+'	<option value="A">A</option>'
+					+'	<option value="CNAME">CNAME</option>'
+					+	'<option value="MX">MX</option>'
+					+'</select></td>'
+					+'<td><select name="line" id="line" >'
+					+	'<option value="默认">默认</option>'
+					+'	<option value="电信">电信</option>'
+					+'	<option value="联通">联通</option>'
+					+'	<option value="教育网">教育网</option>'
+					+'	<option value="搜索引擎">搜索引擎</option>'
+					+'</select></td>'
+					+'<td><input type="text" name="value" id="value" class="form-control" value="'+rec["value"]+'"/></td>'
+					+'<td><input type="text" name="mx" id="mx" class="form-control" value="'+rec["mx"]+'" disabled></td>'
+					+'<td><input type="text" name="ttl" id="ttl" class="form-control" value="'+rec["ttl"]+'" /></td>'
+					+'<td><button type="button" onclick="modifyRec(this,'+rec["id"]+');" class="yes btn btn-success btn-xs" >保存</button>'
+					+'<button type="button" onclick="cancelModify(this);" class="no btn btn-xs" >取消</button></td></tr>';
+
+		$(obj).parent().parent().css("display","none");
+		$(obj).parent().parent().after(element);
+	});
+	function modifyRec(obj,rec_id) {
+		rec={};
+		entry = $(obj).parent().parent().children("td");
+		rec["id"] = rec_id;
+		rec["sub_domain"]=$(entry).children("#sub-domain").val();
+		rec["record_type"]=$(entry).children("#record_type").val();
+		rec["line"]=$(entry).children("#line").val();
+		rec["value"]=$(entry).children("#value").val();
+		rec["mx"]=$(entry).children("#mx").val();
+		rec["ttl"]=$(entry).children("#ttl").val();
+		//console.log(data);
+		//console.log(jQuery.isPlainObject(data));
+		$.post("./record/modify",rec ).done(function(str){
+			//console.log(rec);
+			res = jQuery.parseJSON(str);
+			if(res["status"]["code"]==="1"){
+				self.location = "./";
+			}
+		});
+	}
+	function cancelModify(obj) {
+		self.location = "./";
+	}
+
+	$("#delRec").click(function(){
+		obj = this;
+		checkbox_list = $("input[type='checkbox'][name='records']:checked");
+		rec_id_list = [];
+		for (var i = checkbox_list.length - 1; i >= 0; i--) {
+			rec_id_list.push( $(checkbox_list[i]).val() );
+		};
+		data = {};
+		data["rec_id_list"] = rec_id_list;
+		console.log(rec_id_list);
+		$.post("./record/delete",data).done(function(str){
+			res=jQuery.parseJSON(str);
+			//console.log(res);
+			if(res["status"]["code"]==="1"){
+				//console.log("here");
+				self.location = "./";
+			}
+			});
+	});
+	function disableRec(obj){
+		rec_id = $(obj).parent().parent().children(".entry-checkbox").children("input").val();
+		$.post("./record/disable",{rec_id:rec_id}).done(function(data){
+			res=jQuery.parseJSON(data);
+			//console.log(res);
+			if(res["status"]["code"]==="1"){
+				//console.log("here");
+				//console.log( $(obj).parent().parent() );
+				$(obj).parent().parent().attr("class","entry active");
+				//改变显示该记录的那一行表格的背景颜色
+				$(obj).replaceWith('<a href="javascript:void(0);" onclick="enableRec(this);" >启用</a>');
+				
+			}
+			});
+	}
+	function enableRec(obj){
+		rec_id = $(obj).parent().parent().children(".entry-checkbox").children("input").val();
+		$.post("./record/enable",{rec_id:rec_id}).done(function(data){
+			res=jQuery.parseJSON(data);
+			//console.log(res);
+			if(res["status"]["code"]==="1"){
+				//console.log("here");
+				//console.log( $(obj).parent().parent() );
+				$(obj).parent().parent().attr("class","entry");
+				//改变显示该记录的那一行表格的背景颜色
+				$(obj).replaceWith('<a href="javascript:void(0);" onclick="disableRec(this);" >暂停</a>');
+
+			}
+		});
+	}
+	$("#checkall").click(function(){
+		checkbox = $("table tbody input[type='checkbox']");
+		var status = $("#checkall").prop("checked");
+		console.log(status);  
+		for (var i = checkbox.length - 1; i >= 0; i--) {
+			$(checkbox[i]).prop("checked",status);
+			//使table中的checkbox全选
+		};
+	});
+	//检查是否有checkbox被选中，当被选中数量不为零时，是删除按钮可用，否则不可用
+	$("input[type='checkbox']").click(function(){
+		if($("input[name='records']:checked").length > 0){
+			$("#delRec").attr("disabled",false);
+		}
+		else {
+			$("#delRec").attr("disabled",true);
+		}
+	});
+
+	$("#exportRec").click(function(){
+		obj=this;
+	    obj.download = "{{ escape(domain_name) }}.txt";
+	    obj.href = "data:text/plain;base64," + "{{ content }}";
+
+	});
+	$("#importRec").click(function(){
+		$("#importFile").click();
+	});
+</script>
+{% end %}

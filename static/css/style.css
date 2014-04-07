@@ -1,0 +1,146 @@
+body {
+	padding:0px;
+	margin:0px;
+}
+a,a:hover {
+	text-decoration: none!important;
+}
+h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, cite, code, del, dfn, em, img, q, s, samp, small, strike, strong, sub, sup, tt, var, dd, dl, dt, li, ol, ul, fieldset, form, label, legend, button, table, caption, tbody, tfoot, thead, tr, th, td {
+margin: 0;
+padding: 0;
+border: 0;
+font-weight: normal;
+font-style: normal;
+font-size: 100%;
+line-height: 1;
+font-family: inherit;
+}
+ul {
+	list-style: none;
+}
+/* nav bar*/
+#head-container {
+	background-color: #1c86d1;
+	height:46px;
+	margin-bottom: 10px;
+}
+#nav-bar {
+	width:1000px;
+	margin:0px auto;
+
+}
+#nav-bar #brand {
+	float: left;
+	width: 127px;
+	height: 25px;
+	display: block;
+	color: #fff;
+	margin: 12px 57px 0 0;
+}
+#nav-bar ul#menu {
+	list-style: none;
+	float: left;
+	border-right: 1px solid #49a2e1;
+	border-left: 1px solid #1979bc;
+}
+#nav-bar ul#menu li {
+	float: left;
+}
+#nav-bar ul#menu li a{
+	font-size: 14px;
+	color: #fff;
+	float:none;
+	padding: 0 12px;
+	display: block;
+	border-left: 1px solid #2393e2;
+	border-right: 1px solid #1878bb;
+	line-height: 46px;
+}
+#nav-bar #info-bar ul {
+	float: right;
+	padding: 0px;
+	list-style: none;
+
+}
+#nav-bar #info-bar ul li {
+	float: left;
+
+}
+#nav-bar #info-bar ul li a{
+	line-height: 46px;
+	color: #fff;
+	padding: 0 5px;
+}
+/* index page */
+#main-container {
+	width: 1000px;
+	margin: 0px auto;
+}
+#sidebar {
+	width: 185px;
+	float: left;
+}
+#main {
+	float: left;
+	width: 770px;
+	padding-left: 20px;
+	padding-bottom: 60px;
+	background: #fff;
+	border-left: 1px solid #e2e2e2;
+}
+#domain-control {
+	padding-top: 10px;
+	padding-bottom: 7px;
+	border-bottom: 1px solid #e7e7e7;
+	overflow: hidden;
+}
+#domain-list .entry{
+	border-bottom: 1px dashed #bebebe;
+	z-index: 0;
+}
+#domain-list .entry-modify{
+	padding-top: 10px;
+	padding-bottom: 10px;
+	z-index: 1;
+}
+#domain-list .entry-create{
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+#domain-list .entry .entry-checkbox {
+	width: 16px;
+	height: 16px;
+	margin: 15px;
+	margin-left: 10px;
+	margin-right: 5px;
+	padding-left: 0px;
+	float: left;
+}
+#domain-list .entry .entry-domain a {
+	height: 48px;
+	line-height: 48px;
+}
+#domain-list .entry-create .msg {
+	color: red;
+	display: inline;
+}
+/* showdomain page */
+#record-control {
+	margin-top: 20px;
+}
+#record-list {
+	margin-top: 20px;
+}
+#record-list #domain-name span {
+	margin-right: 10px;
+}
+#record-list #domain-name {
+	font-size: 18px;
+	height: 20px;
+	line-height: 20px;
+}
+#record-list table td {
+	height: 40px;
+	line-height: 40px;
+	vertical-align: middle;
+}

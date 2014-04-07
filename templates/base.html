@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>{{ escape(handler.settings["site_name"]) }}</title>
+	<script src="{{ static_url("js/jquery.min.js") }}"></script>
+	<link rel="stylesheet" href="{{ static_url("css/style.css")}}">
+	<link rel="stylesheet" href="{{ static_url("bootstrap/css/bootstrap.min.css")}}">
+</head>
+<body>
+	<div id="head-container">
+		<div id="nav-bar">
+			<a href="#" id="brand">{{ escape(handler.settings["site_name"]) }}</a>
+			<ul id="menu">
+				<li><a href="/">我的域名</a></li>
+				<li><a href="help">帮助中心</a></li>
+			</ul>
+			{% block info-bar %}
+			{% end %}
+		</div>
+	</div>
+	<div id="main-container">
+		{% block main %}
+		{% end %}
+	</div>
+	<div id="footer-container">
+		
+	</div>
+</body>
+{% block script %}
+{% end %}
+</html>

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block info-bar %}
+<div id="info-bar">
+	<ul>
+		<li class="email"><a>{{uemail}}</a></li>
+		<li><a href="/logout">退出</a></li>
+	</ul>
+</div>
+{% end %}
+{% block main %}
+<div id="sidebar" class="siderbar">
+	<ul>
+		<li>全部域名</li>
+	</ul>
+</div>
+<div id="main">
+	<div id="domain-control">
+		<h3>全部域名</h3>
+		<div class="action">
+			<div class="btn-toolbar">
+				<a href="javascript:void(0);" id="addDomain" class="btn btn-success">添加域名</a>
+				<a href="javascript:void(0);" id="delDomain" class="btn btn-danger" disabled>删除域名</a>
+			</div>
+		</div>
+	</div>
+	<div id="domain-list">
+		{% for domain in domains %}
+		<div class="entry">
+			<div class="entry-checkbox">
+				<input type="checkbox" value="{{ domain["id"]}}" name="domains">
+			</div>
+			<div class="entry-domain">
+				<a href="/domains/{{ domain["id"] }}/">{{ domain["name"] }}</a>
+			</div>
+		</div>
+		{% end %}
+	</div>
+</div>
+{% end %}
+{% block script %}
+<script>
+	$("#addDomain").click(function () {
+		// body...
+		element = '<div class="entry entry-create"><div class="col-sm-5"><input type="text" placeholder="请输入您要解析的域名" class="form-control" id="domain-name"></div><button type="button" onclick="addDomain(this);" class="yes btn btn-success" >确定</button><button type="button" onclick="cancel(this);" class="no btn" >取消</button></div>';
+		$("#domain-list").prepend(element);
+	});
+	function addDomain (obj) {
+		// body...
+		domain = $(obj).parent().children("div").children("input").val();
+		var posting = $.post("/domain/add",{domain:domain});
+		posting.done(function(data){
+			res=jQuery.parseJSON(data);
+			if(res["status"]["code"]==="1"){
+				self.location="/";
+			}
+			else{
+				$(obj).parent().append('<div class="msg">添加失败</div>');
+			}
+		});
+	}
+	function cancel (obj) {
+		$(obj).parent().remove();
+	}
+	//检查是否有checkbox被选中，当被选中数量不为零时，是删除按钮可用，否则不可用
+	$("input[type='checkbox']").click(function(){
+		if($("input[name='domains']:checked").length > 0){
+			$("#delDomain").attr("disabled",false);
+		}
+		else {
+			$("#delDomain").attr("disabled",true);
+		}
+	});
+
+	$("#delDomain").click(function(){
+		obj = this;
+		checkbox_list = $("input[type='checkbox'][name='domains']:checked");
+		domain_id_list = [];
+		for (var i = checkbox_list.length - 1; i >= 0; i--) {
+			domain_id_list.push( $(checkbox_list[i]).val() );
+		};
+		data = {};
+		data["domain_id_list"] = domain_id_list;
+		console.log(domain_id_list);
+		$.post("./domain/delete",data).done(function(str){
+			res=jQuery.parseJSON(str);
+			//console.log(res);
+			if(res["status"]["code"]==="1"){
+				//console.log("here");
+				self.location = "./";
+			}
+			});
+	});
+</script>
+{% end %}
